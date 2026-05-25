@@ -1,0 +1,60 @@
+From: evdi-5120x1440-fix
+Subject: [PATCH 2/2] connector: inject synthetic 5120x1440@60 mode when EDID omits it
+
+Some docks (e.g. ThinkPad Hybrid USB-C Dock, USB ID 17e9:6015) pass a
+truncated EDID to EVDI: the Samsung Odyssey G93SC (32:9, 5120x1440)
+reports EDID Extension Block Count: 3, but DisplayLinkManager forwards
+only 2 blocks (256 bytes). The extension blocks containing the 5120x1440
+detailed timing descriptors are silently dropped.
+
+As a result, drm_add_edid_modes() never sees the native resolution and
+the compositor has no 5120x1440 mode to offer, despite the hardware
+supporting it on Windows with the same dock.
+
+Inject a synthetic CVT reduced-blanking 5120x1440@60 mode after
+drm_add_edid_modes() when the mode is absent from the EDID-derived list.
+The mode then goes through evdi_mode_valid() and is accepted provided
+pixel throughput is within the device limit.
+
+Note: the root fix belongs in DisplayLinkManager (closed source), which
+should forward the full EDID. This patch is a kernel-side workaround
+until that is addressed upstream by Synaptics/DisplayLink.
+
+Tested-on: Samsung Odyssey G93SC (32:9, 5120x1440) via ThinkPad Hybrid
+           USB-C with USB-A Dock (17e9:6015), Linux 6.17, EVDI 1.14.16
+
+Signed-off-by: evdi-5120x1440-fix
+---
+ evdi_connector.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+--- a/evdi_connector.c
++++ b/evdi_connector.c
+@@ -58,6 +58,27 @@ static int evdi_get_modes(struct drm_connector *connector)
+
+ 	ret = drm_add_edid_modes(connector, edid);
+ 	EVDI_INFO("(card%d) Edid property set\n", evdi->dev_index);
++
++	/* Inject 5120x1440@60 if EDID truncated by dock firmware */
++	{
++		struct drm_display_mode *m, *mode_5120 = NULL;
++		bool found = false;
++
++		list_for_each_entry(m, &connector->probed_modes, head) {
++			if (m->hdisplay == 5120 && m->vdisplay == 1440) {
++				found = true;
++				break;
++			}
++		}
++		if (!found) {
++			mode_5120 = drm_cvt_mode(connector->dev, 5120, 1440, 60, true, false, false);
++			if (mode_5120) {
++				drm_mode_probed_add(connector, mode_5120);
++				ret++;
++				EVDI_INFO("(card%d) Injected synthetic 5120x1440@60\n", evdi->dev_index);
++			}
++		}
++	}
+ err:
+ 	kfree(edid);
+ 	return ret;
