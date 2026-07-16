@@ -14,13 +14,13 @@ Two bugs combine to cause this:
 
 The `pixel_per_second_limit` already correctly constrains bandwidth. The area check is redundant and overly strict.
 
-**Fix:** `0001-connector-bypass-pixel-area-limit-for-sub-8K-modes.patch`
+**Fix:** included in `evdi-5120x1440-fix.patch`
 
 ### Bug 2 — DisplayLinkManager truncates the EDID (closed source, workaround here)
 
 The Odyssey G93SC EDID declares `EDID Extension Block Count: 3` (4 blocks total, 512 bytes). `DisplayLinkManager` forwards only 2 blocks (256 bytes) to EVDI, dropping the extension blocks that contain the 5120x1440 detailed timing descriptors. The root fix belongs in `DisplayLinkManager`.
 
-**Workaround:** `0002-connector-inject-5120x1440-mode-when-edid-truncated.patch` — injects a synthetic CVT-RB 5120x1440@60 mode at the kernel level when the EDID-derived mode list does not include it.
+**Workaround:** included in `evdi-5120x1440-fix.patch` — injects a synthetic CVT-RB 5120x1440@60 mode at the kernel level when the EDID-derived mode list does not include it.
 
 ## Affected hardware
 
@@ -43,18 +43,13 @@ sudo reboot
 Or manually:
 
 ```bash
-sudo patch /usr/src/evdi-1.15.0/evdi_connector.c \
-    0001-connector-bypass-pixel-area-limit-for-sub-8K-modes.patch
-
-sudo patch /usr/src/evdi-1.15.0/evdi_connector.c \
-    0002-connector-inject-5120x1440-mode-when-edid-truncated.patch
-
+sudo patch /usr/src/evdi-1.15.0/evdi_connector.c evdi-5120x1440-fix.patch
 sudo dkms build evdi/1.15.0 --force
 sudo dkms install evdi/1.15.0 --force
 sudo reboot
 ```
 
-> For EVDI 1.14.16, use the [v1.14.16 release](https://github.com/PiRifle/evdi-5120x1440-fix/releases/tag/v1.14.16).
+> For other EVDI versions, download the matching release from the [releases page](https://github.com/PiRifle/evdi-5120x1440-fix/releases).
 
 ## Upstream status
 
