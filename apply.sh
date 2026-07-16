@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Apply the combined patch to EVDI 1.15.0, rebuild via DKMS, and reload the module.
+# Apply patches to EVDI 1.15.0, rebuild via DKMS, and reload the module.
 # Run as root or with sudo.
 
 set -e
@@ -14,8 +14,9 @@ if [ ! -d "$EVDI_SRC" ]; then
     exit 1
 fi
 
-echo "==> Applying patch to $EVDI_SRC"
-patch "$EVDI_SRC/evdi_connector.c" "$SCRIPT_DIR/evdi-5120x1440-fix.patch"
+echo "==> Applying patches to $EVDI_SRC"
+patch "$EVDI_SRC/evdi_connector.c" "$SCRIPT_DIR/0001-bypass-pixel-area-limit.patch"
+patch "$EVDI_SRC/evdi_connector.c" "$SCRIPT_DIR/0002-inject-5120x1440-mode.patch"
 
 echo "==> Building EVDI via DKMS"
 dkms build evdi/$EVDI_VER --force

@@ -14,13 +14,13 @@ Two bugs combine to cause this:
 
 The `pixel_per_second_limit` already correctly constrains bandwidth. The area check is redundant and overly strict.
 
-**Fix:** included in `evdi-5120x1440-fix.patch`
+**Fix:** `0001-bypass-pixel-area-limit.patch`
 
 ### Bug 2 — DisplayLinkManager truncates the EDID (closed source, workaround here)
 
 The Odyssey G93SC EDID declares `EDID Extension Block Count: 3` (4 blocks total, 512 bytes). `DisplayLinkManager` forwards only 2 blocks (256 bytes) to EVDI, dropping the extension blocks that contain the 5120x1440 detailed timing descriptors. The root fix belongs in `DisplayLinkManager`.
 
-**Workaround:** included in `evdi-5120x1440-fix.patch` — injects a synthetic CVT-RB 5120x1440@60 mode at the kernel level when the EDID-derived mode list does not include it.
+**Workaround:** `0002-inject-5120x1440-mode.patch` — injects a synthetic CVT-RB 5120x1440@60 mode at the kernel level when the EDID-derived mode list does not include it.
 
 ## Affected hardware
 
@@ -43,7 +43,8 @@ sudo reboot
 Or manually:
 
 ```bash
-sudo patch /usr/src/evdi-1.15.0/evdi_connector.c evdi-5120x1440-fix.patch
+sudo patch /usr/src/evdi-1.15.0/evdi_connector.c 0001-bypass-pixel-area-limit.patch
+sudo patch /usr/src/evdi-1.15.0/evdi_connector.c 0002-inject-5120x1440-mode.patch
 sudo dkms build evdi/1.15.0 --force
 sudo dkms install evdi/1.15.0 --force
 sudo reboot
