@@ -1,0 +1,12 @@
+--- a/evdi_connector.c	2026-07-16 10:29:21.002515293 +0200
++++ b/evdi_connector.c	2026-07-16 10:29:21.004515323 +0200
+@@ -91,7 +91,8 @@
+ 	if (evdi->pixel_per_second_limit == 0)
+ 		return MODE_OK;
+ 
+-	if (area_limit > evdi->pixel_area_limit) {
++	if (area_limit > evdi->pixel_area_limit &&
++	    area_limit > (uint32_t)(7680 * 4320)) {
+ 		EVDI_WARN(
+ 			"(card%d) Mode %dx%d@%d rejected. Reason: mode area too big\n",
+ 			evdi->dev_index,

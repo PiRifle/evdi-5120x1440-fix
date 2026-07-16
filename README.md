@@ -28,7 +28,7 @@ The Odyssey G93SC EDID declares `EDID Extension Block Count: 3` (4 blocks total,
 |-----------|---------|
 | Monitor | Samsung Odyssey G93SC (32:9, native 5120x1440) |
 | Dock | ThinkPad Hybrid USB-C with USB-A Dock (USB ID `17e9:6015`) |
-| EVDI | [1.14.16](https://github.com/DisplayLink/evdi/tree/979ebd3e8f4c422a20678caf04b66514b7abbff1) (tag `v1.14.16`) |
+| EVDI | 1.14.16 ([`979ebd3e`](https://github.com/DisplayLink/evdi/tree/979ebd3e8f4c422a20678caf04b66514b7abbff1)), 1.15.0 |
 | Kernel | 6.17.0 |
 | DisplayLink driver | 6.3.0-48 |
 | Desktop | GNOME on Wayland |
@@ -40,7 +40,7 @@ sudo bash apply.sh
 sudo reboot
 ```
 
-Or manually:
+Or manually (replace `1.14.16` / `v1.14.16` with `1.15.0` / `v1.15.0` and add the `-v1.15.0` suffix to patch filenames if using the newer version):
 
 ```bash
 sudo patch /usr/src/evdi-1.14.16/evdi_connector.c \

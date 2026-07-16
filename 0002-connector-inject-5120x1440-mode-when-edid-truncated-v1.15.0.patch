@@ -1,0 +1,30 @@
+--- a/evdi_connector.c	2026-07-16 10:29:21.004515323 +0200
++++ b/evdi_connector.c	2026-07-16 10:29:32.761401512 +0200
+@@ -57,6 +57,27 @@
+ 
+ 	ret = drm_add_edid_modes(connector, edid);
+ 	EVDI_INFO("(card%d) Edid property set\n", evdi->dev_index);
++
++	/* Inject 5120x1440@60 if EDID truncated by dock firmware */
++	{
++		struct drm_display_mode *m, *mode_5120 = NULL;
++		bool found = false;
++
++		list_for_each_entry(m, &connector->probed_modes, head) {
++			if (m->hdisplay == 5120 && m->vdisplay == 1440) {
++				found = true;
++				break;
++			}
++		}
++		if (!found) {
++			mode_5120 = drm_cvt_mode(connector->dev, 5120, 1440, 60, true, false, false);
++			if (mode_5120) {
++				drm_mode_probed_add(connector, mode_5120);
++				ret++;
++				EVDI_INFO("(card%d) Injected synthetic 5120x1440@60\n", evdi->dev_index);
++			}
++		}
++	}
+ err:
+ 	kfree(edid);
+ 	return ret;
