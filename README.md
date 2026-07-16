@@ -28,7 +28,7 @@ The Odyssey G93SC EDID declares `EDID Extension Block Count: 3` (4 blocks total,
 |-----------|---------|
 | Monitor | Samsung Odyssey G93SC (32:9, native 5120x1440) |
 | Dock | ThinkPad Hybrid USB-C with USB-A Dock (USB ID `17e9:6015`) |
-| EVDI | 1.14.16 ([`979ebd3e`](https://github.com/DisplayLink/evdi/tree/979ebd3e8f4c422a20678caf04b66514b7abbff1)), 1.15.0 |
+| EVDI | 1.15.0 (latest); 1.14.16 via [v1.14.16 release](https://github.com/PiRifle/evdi-5120x1440-fix/releases/tag/v1.14.16) |
 | Kernel | 6.17.0 |
 | DisplayLink driver | 6.3.0-48 |
 | Desktop | GNOME on Wayland |
@@ -40,19 +40,21 @@ sudo bash apply.sh
 sudo reboot
 ```
 
-Or manually (replace `1.14.16` / `v1.14.16` with `1.15.0` / `v1.15.0` and add the `-v1.15.0` suffix to patch filenames if using the newer version):
+Or manually:
 
 ```bash
-sudo patch /usr/src/evdi-1.14.16/evdi_connector.c \
+sudo patch /usr/src/evdi-1.15.0/evdi_connector.c \
     0001-connector-bypass-pixel-area-limit-for-sub-8K-modes.patch
 
-sudo patch /usr/src/evdi-1.14.16/evdi_connector.c \
+sudo patch /usr/src/evdi-1.15.0/evdi_connector.c \
     0002-connector-inject-5120x1440-mode-when-edid-truncated.patch
 
-sudo dkms build evdi/1.14.16 --force
-sudo dkms install evdi/1.14.16 --force
+sudo dkms build evdi/1.15.0 --force
+sudo dkms install evdi/1.15.0 --force
 sudo reboot
 ```
+
+> For EVDI 1.14.16, use the [v1.14.16 release](https://github.com/PiRifle/evdi-5120x1440-fix/releases/tag/v1.14.16).
 
 ## Upstream status
 

@@ -1,34 +1,9 @@
-From: evdi-5120x1440-fix
-Subject: [PATCH 1/2] connector: bypass pixel_area_limit rejection for resolutions within 8K bounds
-
-The pixel_area_limit is set by the DisplayLinkManager userspace daemon
-via EVDI_IOC_CONNECT ioctl. On some docks (e.g. ThinkPad Hybrid USB-C
-Dock, USB ID 17e9:6015) the daemon sets this limit too conservatively,
-causing 5120x1440 (32:9 at 1440p) to be rejected even though the
-hardware supports the resolution on Windows with the same dock.
-
-The pixel_per_second_limit already correctly constrains throughput.
-The area check adds a redundant cap that blocks valid modes: 5120x1440
-at 60 Hz produces fewer pixels/sec than 3840x1080 at 120 Hz, which the
-same dock accepts.
-
-Change the area rejection to only apply for resolutions exceeding 8K
-(7680x4320), which is the hardware maximum defined in evdi_modeset.c.
-
-Tested-on: Samsung Odyssey G93SC (32:9, 5120x1440) via ThinkPad Hybrid
-           USB-C with USB-A Dock (17e9:6015), Linux 6.17, EVDI 1.14.16
-
-Signed-off-by: evdi-5120x1440-fix
----
- evdi_connector.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
---- a/evdi_connector.c
-+++ b/evdi_connector.c
-@@ -94,7 +94,8 @@ static enum drm_mode_status evdi_mode_valid(struct drm_connector *connector,
+--- a/evdi_connector.c	2026-07-16 10:29:21.002515293 +0200
++++ b/evdi_connector.c	2026-07-16 10:29:21.004515323 +0200
+@@ -91,7 +91,8 @@
  	if (evdi->pixel_per_second_limit == 0)
  		return MODE_OK;
-
+ 
 -	if (area_limit > evdi->pixel_area_limit) {
 +	if (area_limit > evdi->pixel_area_limit &&
 +	    area_limit > (uint32_t)(7680 * 4320)) {
